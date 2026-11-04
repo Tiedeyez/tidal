@@ -1,4 +1,4 @@
-# Tidal
+# Tidal Falls
 
 > Over the bar the river leans,
 > a lip of light, a breath, a fall;
@@ -13,7 +13,7 @@
 > sixteen bits of endless blue
 > above the work your morning brings.
 
-A 16-bit waterfall for your Omarchy desktop. Your top bar becomes the brink of the falls, the water pours down the screen in ragged pixel bands, churns into a foaming pool and throws mist back up, and every so often the Omarchy wordmark rises out of the water, holds, and washes away again.
+A 16-bit waterfall for your Omarchy desktop (plugin id `tiedeyez.tidal`, companion theme "Tidal"). Your top bar becomes the brink of the falls, the water pours down the screen in ragged pixel bands, churns into a foaming pool and throws mist back up, and every so often the Omarchy wordmark rises out of the water, holds, and washes away again.
 
 ![Tidal](preview.png)
 
