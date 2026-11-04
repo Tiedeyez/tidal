@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "tiedeyez.tidal",
+  "name": "Tidal",
+  "version": "1.0.0",
+  "author": "Tiedeyez",
+  "license": "MIT",
+  "description": "Over the bar the river leans,\na lip of light, a breath, a fall;\nin ragged bands of sapphire blue\nit quickens down the pixel wall.\nThe pool below throws silver spray,\nthe mist climbs slow on morning air,\nand from the veil a name comes up,\nwet stone that was not always there.\nIt holds a while, then washes clear,\nand still the falling water sings:\nsixteen bits of endless blue\nabove the work your morning brings.",
+  "kinds": ["service"],
+  "entryPoints": { "service": "Service.qml" }
+}

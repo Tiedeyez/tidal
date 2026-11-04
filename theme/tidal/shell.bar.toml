@@ -1,0 +1,11 @@
+# Tidal: the bar is see-through so the plugin tiedeyez.tidal can draw a strip of
+# rolling water behind it (Omarchy's own per-section override; every key of
+# the section must be listed because it replaces the whole [bar] section).
+[bar]
+background       = "#0a1430"
+background-alpha = 0.0
+text             = "#c3ecf8"
+active           = "#f0707e"
+scale-with-font  = true
+size-horizontal  = 26
+size-vertical    = 28

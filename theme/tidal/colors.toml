@@ -1,0 +1,35 @@
+# Tidal: deep-water blues and foam, for a 16-bit waterfall.
+# The ramp is hue-shifted the way SNES-era pixel art builds water:
+# shadows lean indigo, highlights lean cyan, foam is near-white.
+# The animated wave wallpaper (plugin tiedeyez.tidal) uses the same ramp.
+mode = "dark"
+
+accent = "#2d95dc"
+selection = "#174f9c"
+muted = "#46628c"
+
+background = "#0a1430"
+dark_background = "#070e24"
+darker_background = "#050a1c"
+lighter_background = "#142c62"
+
+foreground = "#c3ecf8"
+dark_foreground = "#5b7fa8"
+light_foreground = "#98dbf3"
+bright_foreground = "#e6f8fd"
+
+red = "#f0707e"
+yellow = "#f2d98a"
+orange = "#f3a77a"
+green = "#5fd3b0"
+cyan = "#46ade6"
+blue = "#2d7fe0"
+magenta = "#9d8cf0"
+brown = "#8a7a68"
+
+bright_red = "#ff97a3"
+bright_yellow = "#ffe9b0"
+bright_green = "#8cebcc"
+bright_cyan = "#6cc6ee"
+bright_blue = "#5aa2f0"
+bright_magenta = "#bdb0ff"
