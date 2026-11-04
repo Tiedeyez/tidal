@@ -5,7 +5,11 @@
   "version": "1.0.0",
   "author": "Tiedeyez",
   "license": "MIT",
-  "description": "Over the bar the river leans,\na lip of light, a breath, a fall;\nin ragged bands of sapphire blue\nit quickens down the pixel wall.\nThe pool below throws silver spray,\nthe mist climbs slow on morning air,\nand from the veil a name comes up,\nwet stone that was not always there.\nIt holds a while, then washes clear,\nand still the falling water sings:\nsixteen bits of endless blue\nabove the work your morning brings.",
-  "kinds": ["service"],
-  "entryPoints": { "service": "Service.qml" }
+  "description": "Over the bar the river leans, / a lip of light, a breath, a fall; / in ragged bands of sapphire blue / it quickens down the pixel wall. / The pool below throws silver spray, / the mist climbs slow on morning air, / and from the veil a name comes up, / wet stone that was not always there. / It holds a while, then washes clear, / and still the falling water sings: / sixteen bits of endless blue / above the work your morning brings.",
+  "kinds": [
+    "service"
+  ],
+  "entryPoints": {
+    "service": "Service.qml"
+  }
 }
