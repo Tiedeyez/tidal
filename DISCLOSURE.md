@@ -21,7 +21,7 @@ Nothing. The plugin creates no files, folders, caches or settings. The companion
 |---|---|---|
 | `shaders/tidal.frag.qsb` and `shaders/bar.frag.qsb` (in the plugin folder) | Qt's `ShaderEffect` loads them | The compiled shaders that draw the falls and the brink. They rebuild byte-for-byte from the `.frag` files; see [shaders/PROVENANCE.md](shaders/PROVENANCE.md) |
 | `logo.png` (in the plugin folder) | A hidden Qt `Image`, handed to the shader as a texture | The Omarchy wordmark's shape |
-| The plugin's own entry in `~/.config/omarchy/shell.json` (the object with `"id": "tiedeyez.tidal"`) and that file's `bar.position` | `FileView`, watched for changes; parsed as JSON. Only the keys `pixelSize`, `fps`, `pauseUnderWindows`, `barWater`, `themes` and `clockOffset` are used, numbers range-checked | Optional settings, and whether the bar is at the top (the brink is drawn only then) |
+| The plugin's own entry in `~/.config/omarchy/shell.json` (the object with `"id": "tiedeyez.tidal"`) and that file's `bar.position` | `FileView`, watched for changes; parsed as JSON. Only the keys `pixelSize`, `fps`, `pauseUnderWindows`, `barWater`, `koi`, `themes` and `clockOffset` are used, numbers range-checked | Optional settings, and whether the bar is at the top (the brink is drawn only then) |
 | `~/.local/state/omarchy/current/theme.name` | `FileView`, watched for changes; the name is compared with the `themes` setting | Draw only on the chosen themes |
 | The bar's height | Omarchy's own `Style.bar.sizeHorizontal` (from `qs.Commons`) | Make the brink exactly as tall as the bar |
 | Each monitor's active workspace, and whether it has a fullscreen window | Quickshell's built-in `Quickshell.Hyprland` module, from Hyprland's event socket | Pause while a fullscreen window covers the screen |
@@ -32,9 +32,13 @@ Nothing. The plugin creates no files, folders, caches or settings. The companion
 
 Two click-through layer-shell surfaces per screen on the `bottom` layer (above your normal wallpaper, below your windows): `tiedeyez-tidal` (the falls, below the bar) and `tiedeyez-tidal-brink` (behind the bar). Both have an empty input region, so every click goes to the desktop; neither takes keyboard focus.
 
+## Commands it answers
+
+One IPC handler on the shell's own socket, target `tiedeyez.tidal`, with three functions that take no arguments: `pause`, `resume` and `toggle` (`omarchy-shell tiedeyez.tidal pause`). They set one in-memory flag that stops the frame clock. Nothing is written, and the flag is forgotten when the shell restarts.
+
 ## What it does not do
 
-No network access, no processes, no shell commands, no clipboard, no notifications, no IPC handlers, no timers other than its own frame clock and a 60 ms window-list refresh.
+No network access, no processes, no shell commands, no clipboard, no notifications, no timers other than its own frame clock and a 60 ms window-list refresh.
 
 ## The companion theme
 

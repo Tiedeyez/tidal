@@ -32,6 +32,7 @@ The brink, behind the bar (3x):
   - Splash droplets leave the pool on ballistic arcs, and the pool surface heaves with travelling ripples.
   - The river's flow surges every 80 seconds, and each surge travels through the scene: the lip swells first, the extra water reaches the pool one fall time later, then the mist thickens as it rises.
 - **Omarchy rises out of the water.** The stock Omarchy wordmark surfaces from the bottom rows up with a fizzing edge, water splashes off its tops and leaves a gap beneath, drops gather on its underside and fall, then it washes away. Every 80 seconds.
+- **A koi in the pool.** Every 40 seconds a small gold koi leaps out of the pool, nose up, and drops back in under the same gravity as the spray. Turn it off with `"koi": false`.
 - **Light on the GPU.** It draws at a fifth of your screen's resolution (each art pixel is 5x5 screen pixels), scaled up with hard edges, 12 times a second. The falls pause while a fullscreen or tiled window covers the workspace; the brink keeps moving (it's always visible) until a fullscreen window hides the bar too.
 - **Seamless.** Every motion is a whole number of cycles in a 16-minute loop, so it never jumps.
 
@@ -67,7 +68,7 @@ Switch to another theme first if Tidal is your current one.
 All optional, in Tidal's entry in `~/.config/omarchy/shell.json`; the file is watched, so a change applies at once:
 
 ```json
-{ "id": "tiedeyez.tidal", "pixelSize": 5, "fps": 12, "pauseUnderWindows": true, "barWater": true, "themes": ["tidal"] }
+{ "id": "tiedeyez.tidal", "pixelSize": 5, "fps": 12, "pauseUnderWindows": true, "barWater": true, "koi": true, "themes": ["tidal"] }
 ```
 
 | Setting | Default | What it does |
@@ -76,10 +77,25 @@ All optional, in Tidal's entry in `~/.config/omarchy/shell.json`; the file is wa
 | `fps` | `12` | Redraws per second (1 to 30). The motion is designed for 10 to 12, like the classic tiles. |
 | `pauseUnderWindows` | `true` | Hold the falls still while tiled windows fill the workspace. |
 | `barWater` | `true` | Draw the brink behind the bar. Only used when the bar is at the top. |
+| `koi` | `true` | A gold koi leaps from the pool every 40 seconds. |
 | `themes` | `["tidal"]` | Theme names Tidal draws on; `["*"]` for every theme. |
 | `clockOffset` | `0` | Start the clock this many seconds into the 960-second loop (for testing the loop point). |
 
 The brink follows your bar's height automatically (Omarchy's own `[bar] size-horizontal`).
+
+## Commands
+
+```bash
+omarchy-shell tiedeyez.tidal pause     # hold the water still (a clean screenshot, or to save power)
+omarchy-shell tiedeyez.tidal resume
+omarchy-shell tiedeyez.tidal toggle
+```
+
+A pause lasts until you resume or the shell restarts; nothing is saved.
+
+## Graphics cards
+
+Tidal runs on Intel, AMD and NVIDIA. Versions before 1.1.0 drew a plain dark blue desktop on NVIDIA's driver, which refused the falls shader; if you saw that, update with `omarchy plugin update tiedeyez.tidal`.
 
 ## Performance
 
@@ -104,7 +120,7 @@ Style notes: the techniques come from 8- and 16-bit game art: colour cycling and
 
 ## Disclosure
 
-See [DISCLOSURE.md](DISCLOSURE.md): what Tidal reads (a handful of local files and Hyprland's window state), and that it writes nothing, runs no processes and uses no network.
+See [DISCLOSURE.md](DISCLOSURE.md): what Tidal reads (a handful of local files and Hyprland's window state), the three commands it answers, and that it writes nothing, runs no processes and uses no network.
 
 ## Credits
 

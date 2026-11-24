@@ -24,7 +24,7 @@ import qs.Commons
 //
 // Optional settings, in this plugin's entry in ~/.config/omarchy/shell.json:
 //   { "id": "tiedeyez.tidal", "pixelSize": 5, "fps": 12, "pauseUnderWindows": true,
-//     "barWater": true, "themes": ["tidal"] }
+//     "barWater": true, "koi": true, "themes": ["tidal"] }
 Item {
   id: root
 
@@ -45,6 +45,8 @@ Item {
   readonly property var themes: Array.isArray(settings.themes) ? settings.themes : ["tidal"]
   // the brink needs a top bar; the theme makes the bar transparent so it shows
   readonly property bool barWater: flag("barWater", true) && barPosition === "top"
+  // a gold koi leaps from the pool every 40 seconds
+  readonly property bool koi: flag("koi", true)
   readonly property int barHeight: Style.bar.sizeHorizontal
   // start the clock this many seconds into the loop (for testing the wrap)
   readonly property int clockOffset: setting("clockOffset", 0, 0, 959)
@@ -96,7 +98,7 @@ Item {
   Timer {
     interval: Math.round(1000 / root.fps)
     repeat: true
-    running: root.anyVisible
+    running: root.anyVisible && !root.paused
     property double last: Date.now()
     onRunningChanged: last = Date.now()
     onTriggered: {
@@ -105,6 +107,18 @@ Item {
       last = now
       root.clock = (root.clock + dt) % root.loop
     }
+  }
+
+  // ---- commands ---------------------------------------------------------------
+  //   omarchy-shell tiedeyez.tidal pause | resume | toggle
+  // Holds the water still (for a screenshot, or to save power) until resumed
+  // or the shell restarts. Nothing is written.
+  property bool paused: false
+  ShellIpc {
+    target: root.pluginId
+    function pause(): void { root.paused = true }
+    function resume(): void { root.paused = false }
+    function toggle(): void { root.paused = !root.paused }
   }
 
   // ---- what covers the desktop (tiled or fullscreen windows) ---------------
@@ -176,6 +190,7 @@ Item {
           fragmentShader: Qt.resolvedUrl("shaders/tidal.frag.qsb")
           property real time: panel.shownClock
           property vector2d res: Qt.vector2d(canvas.texW, canvas.texH)
+          property real koi: root.koi ? 1 : 0
           property var logo: logoImage
           Image {
             id: logoImage

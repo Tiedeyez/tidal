@@ -21,6 +21,7 @@ layout(std140, binding = 0) uniform buf {
     float qt_Opacity;
     float time;   // seconds in [0, LOOP)
     vec2 res;     // canvas size in art pixels
+    float koi;    // 1 = a koi leaps from the pool now and then
 };
 layout(binding = 1) uniform sampler2D logo;   // 81 x 19 Omarchy wordmark, alpha = ink
 
@@ -45,21 +46,28 @@ vec3 pal(int i) {
     if (i == 12) return vec3(0.784, 0.902, 1.000); // #c8e6ff
     if (i == 13) return vec3(0.863, 0.941, 1.000); // #dcf0ff
     if (i == 14) return vec3(1.000, 1.000, 1.000); // foam
-    return vec3(1.000, 0.914, 0.690);              // #ffe9b0 (unused here)
+    return vec3(1.000, 0.663, 0.302);              // #ffa94d the koi
 }
 
 // ---- helpers ---------------------------------------------------------------
+// Whole-number min and max: GLSL ES 1.00 has them for floats only, and strict
+// drivers will not convert for you.
+int imin(int a, int b) { return a < b ? a : b; }
+int imax(int a, int b) { return a > b ? a : b; }
 float hash1(float n) { return fract(sin(n * 127.1) * 43758.5453); }
 float hash2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 
 float bayer(vec2 p) {
-    // 4x4 ordered dither threshold in (0, 1)
-    int x = int(mod(p.x, 4.0));
-    int y = int(mod(p.y, 4.0));
-    int i = x + y * 4;
-    float m[16] = float[16](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0,
-                            3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
-    return (m[i] + 0.5) / 16.0;
+    // 4x4 ordered dither threshold in (0, 1). Worked out with arithmetic, not a
+    // table: constant arrays are not GLSL ES 1.00, and strict drivers (NVIDIA)
+    // refuse the whole shader over one. M4(x, y) = 4 M2(x mod 2, y mod 2)
+    // + M2(x div 2, y div 2), with M2(a, b) = 2a + 3b - 4ab.
+    vec2 q = mod(p, 4.0);
+    vec2 lo = mod(q, 2.0);
+    vec2 hi = floor(q / 2.0);
+    float m = 4.0 * (2.0 * lo.x + 3.0 * lo.y - 4.0 * lo.x * lo.y)
+            + (2.0 * hi.x + 3.0 * hi.y - 4.0 * hi.x * hi.y);
+    return (m + 0.5) / 16.0;
 }
 
 // A banded gradient: f is a fractional palette index. Whole bands are flat;
@@ -140,6 +148,31 @@ float surgeAt(float delay) {
     return q * q * q;
 }
 
+// ---- the koi -----------------------------------------------------------------
+// Every 40 s (24 per loop) a gold koi leaps from the pool: thrown up, pulled
+// back by the same gravity as the splash droplets, nose up on the way up and
+// nose down on the way back. Returns its palette index at p, or -1.
+int koiAt(vec2 p, float W, float pool0, float s) {
+    float n = time * 24.0 / LOOP;
+    float gen = floor(n);
+    float t = fract(n) * 40.0;
+    float g = 36.0 * s;
+    float vy = (30.0 + 8.0 * hash1(gen + 4.0)) * s;
+    float T = 2.0 * vy / g;                                   // time in the air
+    if (t >= T) return -1;
+    float dir = hash1(gen * 3.7 + 1.0) < 0.5 ? -1.0 : 1.0;
+    float vx = dir * (8.0 + 6.0 * hash1(gen + 9.0)) * s;
+    vec2 c = floor(vec2((0.15 + 0.7 * hash1(gen * 1.9 + 2.0)) * W + vx * t,
+                        pool0 - vy * t + 0.5 * g * t * t));
+    float lx = (p.x - c.x) * dir;                             // + toward the nose
+    float tilt = t < T * 0.35 ? -1.0 : (t > T * 0.65 ? 1.0 : 0.0);
+    float ly = p.y - c.y - tilt * floor(lx * 0.5 + 0.5);
+    if (lx < -3.0 || lx > 3.0 || ly < -1.0 || ly > 1.0) return -1;
+    if (ly == 0.0) return lx == 2.0 ? 2 : 15;                 // the body, one dark eye
+    if (lx == -3.0 || (lx >= 0.0 && lx <= 2.0)) return 15;    // tail fork, back and belly
+    return -1;
+}
+
 void main() {
     vec2 p = floor(qt_TexCoord0 * res);         // art pixel, y down from the brink
     float W = res.x;
@@ -176,7 +209,7 @@ void main() {
     // the tongue: just past the brink the water is still the bright curve of
     // the pour, ragged per column, fading over the first few rows
     if (p.y < 5.0 * s)
-        idx = max(idx, 11 - int(p.y / s) - int(hash1(xb * 2.3) * 3.0) - int(hash1(floor(xb / 4.0) + 3.0) * 2.0));
+        idx = imax(idx, 11 - int(p.y / s) - int(hash1(xb * 2.3) * 3.0) - int(hash1(floor(xb / 4.0) + 3.0) * 2.0));
 
     // continuity: the sheet thins as it speeds up (thickness ~ v0 / v), so
     // lower down it tears into gaps (the dark rock behind shows) and droplets.
@@ -228,7 +261,7 @@ void main() {
             for (int k = 1; k <= 32; k++) {
                 if (shown(lp - vec2(0.0, float(k) * u), e)) {
                     float fk = float(k);
-                    if (k <= 4) idx = min(idx, 3 + k / 2);
+                    if (k <= 4) idx = imin(idx, 3 + k / 2);
                     float cxl = floor(lp.x);
                     if (e > 0.97 && hash1(cxl * 3.1 + 7.0) > 0.45) {
                         float ph = fract(cyc(400.0) + hash1(cxl * 1.7));     // 2.4 s per drop
@@ -269,7 +302,7 @@ void main() {
         n = smoothstep(0.30, 0.80, n);                           // billows, not a flat haze
         float qm = surgeAt(tauMax + hgt / 4.8);                 // mist from that surge, risen this far
         float rho = n * exp(-hgt / ((22.0 + 10.0 * qm) * s)) * (1.35 + 0.35 * abs(wnd) + 0.5 * qm);
-        if (rho > bayer(p) * 0.9 + 0.06) idx = max(idx, min(13, 9 + int(rho * 4.0)));
+        if (rho > bayer(p) * 0.9 + 0.06) idx = imax(idx, imin(13, 9 + int(rho * 4.0)));
 
         // splash: droplets thrown up from the impact on ballistic arcs
         if (hgt < 26.0 * s) {
@@ -298,6 +331,12 @@ void main() {
                            pool0 - (vr / 0.6) * (1.0 - exp(-0.6 * a)));
             mp.x = wrapx(mp.x, W);
             if (floor(mp) == p) idx = a < 2.0 ? 13 : (a < 3.5 ? 12 : 10);
+        }
+
+        // the koi, in front of the mist and hidden once it is back under the surface
+        if (koi > 0.5) {
+            int fish = koiAt(p, W, pool0, s);
+            if (fish >= 0) idx = fish;
         }
     }
 

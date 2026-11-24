@@ -41,13 +41,16 @@ float hash1(float n) { return fract(sin(n * 127.1) * 43758.5453); }
 float hash2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 
 float bayer(vec2 p) {
-    // 4x4 ordered dither threshold in (0, 1)
-    int x = int(mod(p.x, 4.0));
-    int y = int(mod(p.y, 4.0));
-    int i = x + y * 4;
-    float m[16] = float[16](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0,
-                            3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
-    return (m[i] + 0.5) / 16.0;
+    // 4x4 ordered dither threshold in (0, 1). Worked out with arithmetic, not a
+    // table: constant arrays are not GLSL ES 1.00, and strict drivers (NVIDIA)
+    // refuse the whole shader over one. M4(x, y) = 4 M2(x mod 2, y mod 2)
+    // + M2(x div 2, y div 2), with M2(a, b) = 2a + 3b - 4ab.
+    vec2 q = mod(p, 4.0);
+    vec2 lo = mod(q, 2.0);
+    vec2 hi = floor(q / 2.0);
+    float m = 4.0 * (2.0 * lo.x + 3.0 * lo.y - 4.0 * lo.x * lo.y)
+            + (2.0 * hi.x + 3.0 * hi.y - 4.0 * hi.x * hi.y);
+    return (m + 0.5) / 16.0;
 }
 
 // A banded gradient: f is a fractional palette index. Whole bands are flat;
